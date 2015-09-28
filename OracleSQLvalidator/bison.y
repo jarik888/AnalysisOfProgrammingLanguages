@@ -9,7 +9,10 @@ extern FILE *yyin;
 %}
 
 %error-verbose
-%token SELECT SELECTABLE FROM TABLE WHERE END AND IN OR SQLNULL BETWEEN STRING NUM NOT
+%token SELECT FROM WHERE END AND IN OR SQLNULL BETWEEN STRING COLUMN NUM NOT
+%token EQUALS LESS_OR_EQUALS MORE_OR_EQUALS MORE_OR_EQUAL NOT_EQUAL LESS_THAN MORE_THAN
+/* SELECTABLE */
+/* ROW */
 %left '+'  '-'
 %left '*'  '/'
 %%
@@ -28,12 +31,12 @@ selectable		: selectable ',' selectable
 				;
 condition		: condition AND condition { ; }
 				| condition OR condition { ; }
-				| COLUMN '=' COLUMN { ; }
-				| COLUMN '=' STRING { ; }
-				| COLUMN '<' COLUMN { ; }
-				| COLUMN '>' COLUMN { ; }
-				| COLUMN '<''=' COLUMN { ; }
-				| COLUMN '>''=' COLUMN { ; }
+				| COLUMN EQUALS COLUMN { ; }
+				| COLUMN EQUALS STRING { ; }
+				| COLUMN LESS_THAN COLUMN { ; }
+				| COLUMN MORE_THAN COLUMN { ; }
+				| COLUMN LESS_OR_EQUALS COLUMN { ; }
+				| COLUMN MORE_OR_EQUALS COLUMN { ; }
 				| COLUMN '<''>' COLUMN { ; }
 				| COLUMN NOT BETWEEN NUM AND NUM { ; }
 				| COLUMN BETWEEN NUM AND NUM { ; }
@@ -45,9 +48,10 @@ condition		: condition AND condition { ; }
 				| COLUMN IS NOT SQLNULL { ; }
 				| condition { ; }
 				;
-list 			: NUM ',' NUM
-				| INT
-				| STRING
+list 			: list ',' list
+				| listitem
+listitem        : NUM       { ; }
+                | STRING    { ; }
 				;
 		
 %%

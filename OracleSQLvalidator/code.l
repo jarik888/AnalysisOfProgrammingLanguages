@@ -13,12 +13,35 @@
 %%
 "--"+.+"\n"         { ; }
 ("SELECT"|"FROM"|"WHERE"|"NOT"|"OR"|"AND"|"BETWEEN"|"IS"|"IN"|"DISTINCT"|"LIKE"|"NULL") { printf("<%s>", yytext); }
-\"                  { BEGIN(DOUBLE_QUOTES); printf("<D_STRING>");}
-\'                  { BEGIN(SINGLE_QUOTES); printf("<S_STRING>");}
-[ \t]        { printf("[.]"); }
+"SELECT"        { return SELECT; }
+"COLUMN"        { return COLUMN; }
+"FROM"          { return FROM; }
+"WHERE"         { return WHERE; }
+"END"           { return END; }
+
+"AND"           { return AND; }
+"IN"            { return IN; }
+"OR"            { return OR; }
+"BETWEEN"       { return BETWEEN; }
+
+"NOT"           { return NOT; }
+"=="            { return EQUALS; }
+"<="            { return LESS_OR_EQUALS; }
+">="            { return MORE_OR_EQUALS; }
+"<>"            { return NOT_EQUAL; }
+"<"             { return LESS; }
+">"             { return MORE; }
+
+"STRING"        { return STRING; }
+"NUM"           { return NUM; }
+"SQLNULL"       { return SQLNULL; }
+
+\"              { BEGIN(DOUBLE_QUOTES); printf("<D_STRING>");}
+\'              { BEGIN(SINGLE_QUOTES); printf("<S_STRING>");}
+[ \t]           { printf("[.]"); }
 [^a-zA-Z0-9 \t]    { ; }
 
-<DOUBLE_QUOTES>\" { BEGIN(INITIAL); printf("</D_STRING>"); }
+<DOUBLE_QUOTES>\" { BEGIN(INITIAL); return COLUMN; printf("</D_STRING>"); }
 <DOUBLE_QUOTES>. {printf("%s", yytext); }
 
 <SINGLE_QUOTES>\' { BEGIN(INITIAL); printf("</S_STRING>"); }
