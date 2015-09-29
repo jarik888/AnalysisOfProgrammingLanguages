@@ -9,8 +9,7 @@ extern FILE *yyin;
 %}
 
 %error-verbose
-%token SELECT FROM WHERE END AND IN OR SQLNULL BETWEEN STRING COLUMN NUM NOT
-%token EQUALS LESS_OR_EQUALS MORE_OR_EQUALS MORE_OR_EQUAL NOT_EQUAL LESS_THAN MORE_THAN
+%token SELECT ITEM DISTINCT COLUMN COLNAME FROM WHERE END AND IN IS OR BETWEEN LIKE NOT EQUALS LESS_OR_EQUALS MORE_OR_EQUALS NOT_EQUAL LESS_THAN MORE_THAN ALL STRING NUM SQLNULL
 /* SELECTABLE */
 /* ROW */
 %left '+'  '-'
@@ -19,9 +18,9 @@ extern FILE *yyin;
 prog 			:
 				| prog selection
 				;	
-selection		: SELECT selectable FROM TABLE END	{ ; }
-				| SELECT selectable FROM TABLE WHERE condition END 	{ ; }
-				| error END				{ yyerrok; }
+selection		: SELECT selectable FROM ITEM END                   { ; }
+				| SELECT selectable FROM ITEM WHERE condition END 	{ ; }
+				| error END                         				{ yyerrok; }
 				;
 selectable		: selectable ',' selectable
 				| DISTINCT selectable { ; }
@@ -37,7 +36,7 @@ condition		: condition AND condition { ; }
 				| COLUMN MORE_THAN COLUMN { ; }
 				| COLUMN LESS_OR_EQUALS COLUMN { ; }
 				| COLUMN MORE_OR_EQUALS COLUMN { ; }
-				| COLUMN '<''>' COLUMN { ; }
+				| COLUMN NOT_EQUAL COLUMN { ; }
 				| COLUMN NOT BETWEEN NUM AND NUM { ; }
 				| COLUMN BETWEEN NUM AND NUM { ; }
 				| COLUMN IN '(' list ')' { ; }
@@ -46,7 +45,6 @@ condition		: condition AND condition { ; }
 				| COLUMN NOT LIKE STRING { ; }
 				| COLUMN IS SQLNULL { ; }
 				| COLUMN IS NOT SQLNULL { ; }
-				| condition { ; }
 				;
 list 			: list ',' list
 				| listitem
@@ -60,7 +58,7 @@ int main(int argc, char **argv) {
 	if (argc < 2) {
 		return -1;
 	}
-	yyin = fopen(argv[1]); //yyin file for flex input
+	yyin = fopen(argv[1], "r"); //yyin file for flex input
 	if (yyin) {
 			yyparse();	
 	} else {
@@ -70,7 +68,7 @@ int main(int argc, char **argv) {
 }
 
 void yyerror(const char *s) {
-	printf("ERR: %s at %d\n", s, yylineo);
+	printf("ERR: %s at %d\n", s, yylineno);
 }
 
 int yywrap(void) {

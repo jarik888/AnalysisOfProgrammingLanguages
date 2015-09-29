@@ -1,7 +1,8 @@
 %top{
-//#include "code.tab.h"
-#include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+#include "bison.tab.h"
 }
 
 %option case-insensitive 
@@ -12,43 +13,51 @@
 
 %%
 "--"+.+"\n"         { ; }
-("SELECT"|"FROM"|"WHERE"|"NOT"|"OR"|"AND"|"BETWEEN"|"IS"|"IN"|"DISTINCT"|"LIKE"|"NULL") { printf("<%s>", yytext); }
 "SELECT"        { return SELECT; }
-"COLUMN"        { return COLUMN; }
+"DISTINCT"      { return DISTINCT; }
+"COLUMN"        { return ITEM; } /* column or table */
 "FROM"          { return FROM; }
 "WHERE"         { return WHERE; }
-"END"           { return END; }
+";"             { return END; }
 
 "AND"           { return AND; }
 "IN"            { return IN; }
+"IS"            { return IS; }
 "OR"            { return OR; }
 "BETWEEN"       { return BETWEEN; }
-
+"LIKE"          { return LIKE; }
 "NOT"           { return NOT; }
+
 "=="            { return EQUALS; }
 "<="            { return LESS_OR_EQUALS; }
 ">="            { return MORE_OR_EQUALS; }
 "<>"            { return NOT_EQUAL; }
-"<"             { return LESS; }
-">"             { return MORE; }
+"<"             { return LESS_THAN; }
+">"             { return MORE_THAN; }
+"*"             { return ALL; }
 
 "STRING"        { return STRING; }
-"NUM"           { return NUM; }
-"SQLNULL"       { return SQLNULL; }
+[0-9]+          { return NUM; printf("<NUM>%s</NUM>", yytext); }
+"NULL"          { return SQLNULL; }
 
 \"              { BEGIN(DOUBLE_QUOTES); printf("<D_STRING>");}
 \'              { BEGIN(SINGLE_QUOTES); printf("<S_STRING>");}
 [ \t]           { printf("[.]"); }
-[^a-zA-Z0-9 \t]    { ; }
+\,              { return yytext[0]; }
+[a-zA-Z0-9]     { return ITEM; }
+/*[^a-zA-Z0-9 \t] { ; }*/
 
-<DOUBLE_QUOTES>\" { BEGIN(INITIAL); return COLUMN; printf("</D_STRING>"); }
+<DOUBLE_QUOTES>\" { BEGIN(INITIAL); return COLNAME; printf("</D_STRING>"); }
 <DOUBLE_QUOTES>. {printf("%s", yytext); }
 
-<SINGLE_QUOTES>\' { BEGIN(INITIAL); printf("</S_STRING>"); }
+<SINGLE_QUOTES>\' { BEGIN(INITIAL); return STRING; printf("</S_STRING>"); }
 <SINGLE_QUOTES>. {printf("%s", yytext); }
 
 
 %%
+
+/*
+FILE *yyin;
 
 int yywrap(void){
 	return 1;
@@ -59,11 +68,11 @@ int main (int argc, char **argv){
         return -1;
     yyin = fopen(argv[1], "r");
     if(yyin)
-        //yyparse();
-        yylex();
+        yyparse();
+        //yylex();
     return 0;
 }
-
+*/
 
 
 
