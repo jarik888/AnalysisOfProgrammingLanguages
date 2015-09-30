@@ -40,12 +40,13 @@
 [0-9]+          { return NUM; printf("<NUM>%s</NUM>", yytext); }
 "NULL"          { return SQLNULL; }
 
+[a-zA-Z0-9]+    { return ITEM; }
+
 \"              { BEGIN(DOUBLE_QUOTES); printf("<D_STRING>");}
 \'              { BEGIN(SINGLE_QUOTES); printf("<S_STRING>");}
 [ \t]           { printf("[.]"); }
 \,              { return yytext[0]; }
-[a-zA-Z0-9]     { return ITEM; }
-/*[^a-zA-Z0-9 \t] { ; }*/
+
 
 <DOUBLE_QUOTES>\" { BEGIN(INITIAL); return COLNAME; printf("</D_STRING>"); }
 <DOUBLE_QUOTES>. {printf("%s", yytext); }
