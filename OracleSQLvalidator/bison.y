@@ -26,15 +26,16 @@ selection		: SELECT selectablelist FROM ITEM END                   { puts("SELEC
 selectablelist  : selectablelist ',' selectablelist { ; }
                 | selectable                    { ; }
 selectable      : DISTINCT selectable           { ; }
-                /* TODO: AS implementation ?    { ; }*/
+                | selectable AS COLNAME         { ; } /* TODO: AS implementation ?    { ; }*/
 				| '*'		                    { ; }
 				| ITEM  	                    { ; }
 				| ITEM COLNAME                  { ; }
                 | mathexpr                      { ; }
                 | mathexpr COLNAME              { ; }
 				;
-tablelist       : tablelistitem ',' tablelistitem { ; }
-                | tablelistitem                 { ; }
+/*tablelist       : tablelistitem ',' tablelistitem { ; }
+                | tablelistitem                 { ; }*/ 
+
 tablelistitem   : ITEM ITEM                     { ; }
                 | ITEM                          { ; }
 mathexpr        : '(' mathexpr ')'              { ; }

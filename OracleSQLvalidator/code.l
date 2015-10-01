@@ -15,10 +15,10 @@
 "--"+.+"\n"     { return COMMENT; }
 \n              { ; }
 
-"SELECT"        { return SELECT; printf("YOLO"); }
+"SELECT"        { return SELECT; }
 "DISTINCT"      { return DISTINCT; }
 "COLUMN"        { return ITEM; } /* column or table */
-"FROM"          { return FROM; puts("YOLO");}
+"FROM"          { return FROM; }
 "WHERE"         { return WHERE; }
 "AS"            { return AS; }
 ";"             { return END; }
