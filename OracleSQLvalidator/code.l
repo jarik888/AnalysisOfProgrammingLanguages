@@ -12,12 +12,15 @@
 %x DOUBLE_QUOTES
 
 %%
-"--"+.+"\n"         { ; }
-"SELECT"        { return SELECT; }
+"--"+.+"\n"     { return COMMENT; }
+\n              { ; }
+
+"SELECT"        { return SELECT; printf("YOLO"); }
 "DISTINCT"      { return DISTINCT; }
 "COLUMN"        { return ITEM; } /* column or table */
-"FROM"          { return FROM; }
+"FROM"          { return FROM; puts("YOLO");}
 "WHERE"         { return WHERE; }
+"AS"            { return AS; }
 ";"             { return END; }
 
 "AND"           { return AND; }
@@ -34,25 +37,22 @@
 "<>"            { return NOT_EQUAL; }
 "<"             { return LESS_THAN; }
 ">"             { return MORE_THAN; }
-"*"             { return ALL; }
+[\,\(\)\+\-\*]  { return yytext[0]; }
 
-"STRING"        { return STRING; }
-[0-9]+          { return NUM; printf("<NUM>%s</NUM>", yytext); }
 "NULL"          { return SQLNULL; }
+[0-9]+          { return NUM; printf("<NUM>%s</NUM>", yytext); }
+([a-zA-Z]+[0-9]|[a-zA-Z]+)    { return ITEM; }
 
-[a-zA-Z0-9]+    { return ITEM; }
+\"              { BEGIN(DOUBLE_QUOTES); /*printf("<D_STRING>");*/}
+\'              { BEGIN(SINGLE_QUOTES); /*printf("<S_STRING>");*/}
 
-\"              { BEGIN(DOUBLE_QUOTES); printf("<D_STRING>");}
-\'              { BEGIN(SINGLE_QUOTES); printf("<S_STRING>");}
-[ \t]           { printf("[.]"); }
-\,              { return yytext[0]; }
 
 
 <DOUBLE_QUOTES>\" { BEGIN(INITIAL); return COLNAME; printf("</D_STRING>"); }
-<DOUBLE_QUOTES>. {printf("%s", yytext); }
+<DOUBLE_QUOTES>. {/*printf("%s", yytext)*/; }
 
 <SINGLE_QUOTES>\' { BEGIN(INITIAL); return STRING; printf("</S_STRING>"); }
-<SINGLE_QUOTES>. {printf("%s", yytext); }
+<SINGLE_QUOTES>. {/*printf("%s", yytext)*/; }
 
 
 %%

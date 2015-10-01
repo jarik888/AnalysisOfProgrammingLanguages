@@ -9,47 +9,64 @@ extern FILE *yyin;
 %}
 
 %error-verbose
-%token SELECT ITEM DISTINCT COLUMN COLNAME FROM WHERE END AND IN IS OR BETWEEN LIKE NOT EQUALS LESS_OR_EQUALS MORE_OR_EQUALS NOT_EQUAL LESS_THAN MORE_THAN ALL STRING NUM SQLNULL
+%token COMMENT SELECT ITEM DISTINCT COLNAME FROM WHERE END AND AS IN IS OR BETWEEN LIKE NOT EQUALS LESS_OR_EQUALS MORE_OR_EQUALS NOT_EQUAL LESS_THAN MORE_THAN ALL STRING NUM SQLNULL
 /* SELECTABLE */
 /* ROW */
 %left '+'  '-'
 %left '*'  '/'
+%left ','
 %%
 prog 			:
 				| prog selection
 				;	
-selection		: SELECT selectable FROM ITEM END                   { ; }
-				| SELECT selectable FROM ITEM WHERE condition END 	{ ; }
+selection		: SELECT selectablelist FROM ITEM END                   { puts("SELECT selectable FROM ITEM END"); }
+				| SELECT selectablelist FROM ITEM WHERE condition END 	{ ; }
 				| error END                         				{ yyerrok; }
+                | COMMENT                                           { printf("comment\n"); }
+selectablelist  : selectablelist ',' selectablelist { ; }
+                | selectable                    { ; }
+selectable      : DISTINCT selectable           { ; }
+                /* TODO: AS implementation ?    { ; }*/
+				| '*'		                    { ; }
+				| ITEM  	                    { ; }
+				| ITEM COLNAME                  { ; }
+                | mathexpr                      { ; }
+                | mathexpr COLNAME              { ; }
 				;
-selectable		: selectable ',' selectable
-				| DISTINCT selectable { ; }
-				| ALL		{ ; }
-				| COLUMN  	{ ; }
-				| COLUMN COLNAME { ; }
+tablelist       : tablelistitem ',' tablelistitem { ; }
+                | tablelistitem                 { ; }
+tablelistitem   : ITEM ITEM                     { ; }
+                | ITEM                          { ; }
+mathexpr        : '(' mathexpr ')'              { ; }
+                | mathexpr '+' mathexpr         { ; }
+                | mathexpr '-' mathexpr         { ; }
+                | mathexpr '*' mathexpr         { ; }
+                | mathexpr '/' mathexpr         { ; }
+                | NUM                           { ; }
+                | ITEM                          { ; }
+condition		: condition AND condition       { ; }
+				| condition OR condition        { ; }
+				| ITEM EQUALS ITEM              { ; }
+				| ITEM EQUALS STRING            { ; }
+				| ITEM LESS_THAN ITEM           { ; }
+				| ITEM MORE_THAN ITEM           { ; }
+				| ITEM LESS_OR_EQUALS ITEM      { ; }
+				| ITEM MORE_OR_EQUALS ITEM      { ; }
+				| ITEM NOT_EQUAL ITEM           { ; }
+				| ITEM NOT BETWEEN NUM AND NUM  { ; }
+				| ITEM BETWEEN NUM AND NUM      { ; }
+				| ITEM IN '(' list ')'          { ; }
+				| ITEM NOT IN '(' list ')'      { ; }
+				| ITEM LIKE STRING              { ; }
+				| ITEM NOT LIKE STRING          { ; }
+				| ITEM IS SQLNULL               { ; }
+				| ITEM IS NOT SQLNULL           { ; }
+                | ITEM
 				;
-condition		: condition AND condition { ; }
-				| condition OR condition { ; }
-				| COLUMN EQUALS COLUMN { ; }
-				| COLUMN EQUALS STRING { ; }
-				| COLUMN LESS_THAN COLUMN { ; }
-				| COLUMN MORE_THAN COLUMN { ; }
-				| COLUMN LESS_OR_EQUALS COLUMN { ; }
-				| COLUMN MORE_OR_EQUALS COLUMN { ; }
-				| COLUMN NOT_EQUAL COLUMN { ; }
-				| COLUMN NOT BETWEEN NUM AND NUM { ; }
-				| COLUMN BETWEEN NUM AND NUM { ; }
-				| COLUMN IN '(' list ')' { ; }
-				| COLUMN NOT IN '(' list ')' { ; }
-				| COLUMN LIKE STRING { ; }
-				| COLUMN NOT LIKE STRING { ; }
-				| COLUMN IS SQLNULL { ; }
-				| COLUMN IS NOT SQLNULL { ; }
-				;
-list 			: list ',' list
+list 			: list ',' list                 { ; }
 				| listitem
-listitem        : NUM       { ; }
-                | STRING    { ; }
+listitem        : NUM                           { ; }
+                | STRING                        { ; }
 				;
 		
 %%
@@ -60,9 +77,9 @@ int main(int argc, char **argv) {
 	}
 	yyin = fopen(argv[1], "r"); //yyin file for flex input
 	if (yyin) {
-			yyparse();	
+        yyparse();	
 	} else {
-		printf("cannot open %s\n", argv[1]);
+        printf("cannot open %s\n", argv[1]);
 	}
 	return 0;
 }
