@@ -17,7 +17,6 @@
 
 "SELECT"        { return SELECT; }
 "DISTINCT"      { return DISTINCT; }
-"COLUMN"        { return ITEM; } /* column or table */
 "FROM"          { return FROM; }
 "WHERE"         { return WHERE; }
 "AS"            { return AS; }
@@ -37,7 +36,7 @@
 "<>"            { return NOT_EQUAL; }
 "<"             { return LESS_THAN; }
 ">"             { return MORE_THAN; }
-[\,\(\)\+\-\*]  { return yytext[0]; }
+[\,\(\)\+\-\*]  { return COLUMN; /*yytext[0];*/ }
 
 "NULL"          { return SQLNULL; }
 [0-9]+          { return NUM; printf("<NUM>%s</NUM>", yytext); }

@@ -22,22 +22,28 @@ prog 			:
 selection		: SELECT selectablelist FROM ITEM END                   { puts("SELECT selectable FROM ITEM END"); }
 				| SELECT selectablelist FROM ITEM WHERE condition END 	{ ; }
 				| error END                         				{ yyerrok; }
-                | COMMENT                                           { printf("comment\n"); }
+                | COMMENT                                           { /*printf("comment\n");*/ }
+                ;
 selectablelist  : selectablelist ',' selectablelist { ; }
                 | selectable                    { ; }
+                ;
 selectable      : DISTINCT selectable           { ; }
                 | selectable AS COLNAME         { ; } /* TODO: AS implementation ?    { ; }*/
+                | selectable AS COLNAME ',' aslist  { ; }
 				| '*'		                    { ; }
 				| ITEM  	                    { ; }
 				| ITEM COLNAME                  { ; }
                 | mathexpr                      { ; }
                 | mathexpr COLNAME              { ; }
 				;
+aslist          : COLNAME COLNAME               { ; }
+                | aslist ',' aslist             { ; }
 /*tablelist       : tablelistitem ',' tablelistitem { ; }
                 | tablelistitem                 { ; }*/ 
-
+                ;
 tablelistitem   : ITEM ITEM                     { ; }
                 | ITEM                          { ; }
+                ;
 mathexpr        : '(' mathexpr ')'              { ; }
                 | mathexpr '+' mathexpr         { ; }
                 | mathexpr '-' mathexpr         { ; }
@@ -45,6 +51,7 @@ mathexpr        : '(' mathexpr ')'              { ; }
                 | mathexpr '/' mathexpr         { ; }
                 | NUM                           { ; }
                 | ITEM                          { ; }
+                ;
 condition		: condition AND condition       { ; }
 				| condition OR condition        { ; }
 				| ITEM EQUALS ITEM              { ; }
@@ -65,7 +72,8 @@ condition		: condition AND condition       { ; }
                 | ITEM
 				;
 list 			: list ',' list                 { ; }
-				| listitem
+				| listitem                      { ; }
+                ;
 listitem        : NUM                           { ; }
                 | STRING                        { ; }
 				;
