@@ -17,6 +17,7 @@
 
 "SELECT"        { return SELECT; }
 "DISTINCT"      { return DISTINCT; }
+"COLUMN"        { return ITEM; } /* column or table */
 "FROM"          { return FROM; }
 "WHERE"         { return WHERE; }
 "AS"            { return AS; }
@@ -30,17 +31,18 @@
 "LIKE"          { return LIKE; }
 "NOT"           { return NOT; }
 
-"=="            { return EQUALS; }
+"="            	{ return EQUALS; }
 "<="            { return LESS_OR_EQUALS; }
 ">="            { return MORE_OR_EQUALS; }
 "<>"            { return NOT_EQUAL; }
 "<"             { return LESS_THAN; }
 ">"             { return MORE_THAN; }
-[\,\(\)\+\-\*]  { return COLUMN; /*yytext[0];*/ }
+"||"			{ return CONCAT; }
+[\,\(\)\+\-\*\/]  { return yytext[0]; } /* return character */ 
 
 "NULL"          { return SQLNULL; }
 [0-9]+          { return NUM; printf("<NUM>%s</NUM>", yytext); }
-([a-zA-Z]+[0-9]|[a-zA-Z]+)    { return ITEM; }
+([a-zA-Z]+[0-9]+|[a-zA-Z]+)    { return ITEM; }
 
 \"              { BEGIN(DOUBLE_QUOTES); /*printf("<D_STRING>");*/}
 \'              { BEGIN(SINGLE_QUOTES); /*printf("<S_STRING>");*/}
