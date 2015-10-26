@@ -22,23 +22,22 @@ extern FILE *yyin;
 prog            :
                 | prog selection
                 ;   
-selection       : SELECT selector_list FROM ITEM END                   { puts("SELECT selectable FROM ITEM END"); }
-                | SELECT DISTINCT selector_list FROM ITEM END          { puts("SELECT selectable FROM ITEM END"); }
-                | SELECT selector_list FROM ITEM WHERE condition END   { ; }
-                | SELECT DISTINCT selector_list FROM ITEM WHERE condition END  { ; }
-                | SELECT DISTINCT                                   { ; }
+selection       : SELECT selector_list FROM ITEM END                   { ; }
+                | SELECT DISTINCT selector_list FROM ITEM END          { ; }
+                | SELECT selector_list FROM ITEM WHERE condition_list END   { ; }
+                | SELECT DISTINCT selector_list FROM ITEM WHERE condition_list END  { ; }
                 | error END                                         { yyerrok; }
-                | COMMENT                                           { printf("comment\n"); }
+                | COMMENT                                           { ; }
                 ;
 
 selector_list   : selector ',' selector_list            { ; }
                 | selector                              { ; }
                 ;
-selector        : ITEM                                  { ; }
-                | selector alias                        { ; }
+selector        : selector alias                        { ; }
                 | selector AS alias                     { ; }
                 | '*'                                   { ; }
                 | sel_concat                            { ; }
+                /*| ITEM                                  { ; } // item is contained in another place */
                 | sel_math_exp                          { ; }
                 ;
 
@@ -53,7 +52,7 @@ sel_concat_item : ITEM                                  { ; }
                 | STRING                                { ; }
                 ;
 
-sel_math_exp    : sel_math_exp sel_math_exp { ; }
+/*sel_math_exp    : sel_math_exp sel_math_exp { ; }
                 | '(' { ; }
                 | ')' { ; }
                 | '+' { ; }
@@ -62,18 +61,34 @@ sel_math_exp    : sel_math_exp sel_math_exp { ; }
                 | '/' { ; }
                 | NUM { ; }
                 | ITEM { ; }
-                ;
-/*sel_math_exp    : '(' mathexpr ')'              { ; }
-                | mathexpr '+' mathexpr         { ; }
-                | mathexpr '-' mathexpr         { ; }
-                | mathexpr '*' mathexpr         { ; }
-                | mathexpr '/' mathexpr         { ; }
-                | NUM                           { ; }
-                | ITEM                          { ; }
                 ;*/
-condition       : condition AND condition       { ; }
-                | condition OR condition        { ; }
-                | ITEM EQUALS ITEM              { ; }
+sel_math_exp    : '(' sel_math_op ')'                  { ; }
+                | sel_math_op '+' sel_math_op         { ; }
+                | sel_math_op '-' sel_math_op         { ; }
+                | sel_math_op '*' sel_math_op         { ; }
+                | sel_math_op '/' sel_math_op         { ; }
+                ;
+sel_math_op     : sel_math_exp { ; }
+                | NUM { ; }
+                | ITEM { ; }
+                ;
+                /*
+sel_math_op   : '(' sel_math_exp ')'                  { ; }
+                | sel_math_exp '+' sel_math_exp         { ; }
+                | sel_math_exp '-' sel_math_exp         { ; }
+                | sel_math_exp '*' sel_math_exp         { ; }
+                | sel_math_exp '/' sel_math_exp         { ; }
+                | NUM                           { ; }
+                | ITEM                          { ; } /*
+                                                      ITEM causes reduce conflicts.
+                                                      One solution is to use sel_math_exp and sel_math_op.
+                                                      Second solution is to define operand. */
+                ;
+condition_list  : condition AND condition_list       { ; }
+                | condition OR condition_list        { ; }
+                | condition { ; }
+                ;
+condition       : ITEM EQUALS ITEM              { ; }
                 | ITEM EQUALS STRING            { ; }
                 | ITEM LESS_THAN cmp_op           { ; }
                 | ITEM MORE_THAN cmp_op           { ; }
@@ -88,13 +103,13 @@ condition       : condition AND condition       { ; }
                 | ITEM NOT LIKE STRING          { ; }
                 | ITEM IS SQLNULL               { ; }
                 | ITEM IS NOT SQLNULL           { ; }
-                | ITEM
+                | ITEM                          { ; }
                 ;
 cmp_op          : ITEM { ; }
                 | STRING { ; }
                 | NUM    { ; }
                 ;
-list            : list ',' list                 { ; }
+list            : listitem ',' list             { ; }
                 | listitem                      { ; }
                 ;
 listitem        : NUM                           { ; }
