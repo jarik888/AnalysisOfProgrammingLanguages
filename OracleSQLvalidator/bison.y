@@ -20,14 +20,14 @@ extern FILE *yyin;
 %left ','
 %%
 prog            :
-                | prog selection
+                | prog selection 
                 ;   
-selection       : SELECT selector_list FROM ITEM END                   { ; }
-                | SELECT DISTINCT selector_list FROM ITEM END          { ; }
-                | SELECT selector_list FROM ITEM WHERE condition_list END   { ; }
+selection       : SELECT selector_list FROM ITEM END                                { ; }
+                | SELECT DISTINCT selector_list FROM ITEM END                       { ; }
+                | SELECT selector_list FROM ITEM WHERE condition_list END           { ; }
                 | SELECT DISTINCT selector_list FROM ITEM WHERE condition_list END  { ; }
-                | error END                                         { yyerrok; }
-                | COMMENT                                           { ; }
+                | error END                                                         { yyerrok; }
+                | COMMENT                                                           { ; }
                 ;
 
 selector_list   : selector ',' selector_list            { ; }
@@ -37,7 +37,7 @@ selector        : selector alias                        { ; }
                 | selector AS alias                     { ; }
                 | '*'                                   { ; }
                 | sel_concat                            { ; }
-                /*| ITEM                                  { ; } // item is contained in another place */
+                /*| ITEM                                  { ; } // item is contained in sel_concat place */
                 | sel_math_exp                          { ; }
                 ;
 
@@ -62,11 +62,11 @@ sel_concat_item : ITEM                                  { ; }
                 | NUM { ; }
                 | ITEM { ; }
                 ;*/
-sel_math_exp    : '(' sel_math_op ')'                  { ; }
-                | sel_math_op '+' sel_math_op         { ; }
-                | sel_math_op '-' sel_math_op         { ; }
-                | sel_math_op '*' sel_math_op         { ; }
-                | sel_math_op '/' sel_math_op         { ; }
+sel_math_exp    : '(' sel_math_op ')'                   { ; }
+                | sel_math_op '+' sel_math_op           { ; }
+                | sel_math_op '-' sel_math_op           { ; }
+                | sel_math_op '*' sel_math_op           { ; }
+                | sel_math_op '/' sel_math_op           { ; }
                 ;
 sel_math_op     : sel_math_exp { ; }
                 | NUM { ; }
@@ -84,12 +84,12 @@ sel_math_op   : '(' sel_math_exp ')'                  { ; }
                                                       One solution is to use sel_math_exp and sel_math_op.
                                                       Second solution is to define operand. */
                 ;
-condition_list  : condition AND condition_list       { ; }
-                | condition OR condition_list        { ; }
+condition_list  : condition AND condition_list              { ; }
+                | condition OR condition_list               { ; }
                 | condition { ; }
                 ;
-condition       : ITEM EQUALS ITEM              { ; }
-                | ITEM EQUALS STRING            { ; }
+condition       : ITEM EQUALS ITEM                          { ; }
+                | ITEM EQUALS STRING                        { ; }
                 | ITEM LESS_THAN cmp_op           { ; }
                 | ITEM MORE_THAN cmp_op           { ; }
                 | ITEM LESS_OR_EQUALS cmp_op      { ; }
