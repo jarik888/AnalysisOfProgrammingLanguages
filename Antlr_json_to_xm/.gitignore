@@ -1,0 +1,7 @@
+*.xml
+*.json
+.idea
+*.iml
+gen
+out
+lib
